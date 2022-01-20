@@ -7,3 +7,12 @@ C:\Users\altam\Desktop\DisplayModeToggler\DisplayModeToggler\DisplayModeToggler\
 C:\Users\altam\Desktop\DisplayModeToggler\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.csproj.CoreCompileInputs.cache
 C:\Users\altam\Desktop\DisplayModeToggler\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.exe
 C:\Users\altam\Desktop\DisplayModeToggler\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.pdb
+C:\Users\altam\OneDrive\Documents\GIT\DisplaySwitcher\DisplayModeToggler\DisplayModeToggler\bin\Debug\DisplayModeToggler.exe
+C:\Users\altam\OneDrive\Documents\GIT\DisplaySwitcher\DisplayModeToggler\DisplayModeToggler\bin\Debug\DisplayModeToggler.pdb
+C:\Users\altam\OneDrive\Documents\GIT\DisplaySwitcher\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.csprojAssemblyReference.cache
+C:\Users\altam\OneDrive\Documents\GIT\DisplaySwitcher\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.Form1.resources
+C:\Users\altam\OneDrive\Documents\GIT\DisplaySwitcher\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.Properties.Resources.resources
+C:\Users\altam\OneDrive\Documents\GIT\DisplaySwitcher\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.csproj.GenerateResource.cache
+C:\Users\altam\OneDrive\Documents\GIT\DisplaySwitcher\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.csproj.CoreCompileInputs.cache
+C:\Users\altam\OneDrive\Documents\GIT\DisplaySwitcher\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.exe
+C:\Users\altam\OneDrive\Documents\GIT\DisplaySwitcher\DisplayModeToggler\DisplayModeToggler\obj\Debug\DisplayModeToggler.pdb

@@ -36,6 +36,8 @@ namespace DisplayModeToggler
     
     private int _lastSelectedSingleClickIndex;
     
+    private int _lastSelectedModeIndex;
+    
     public Form1()
     {
       InitializeComponent();
@@ -90,11 +92,25 @@ namespace DisplayModeToggler
     {
       if (e.Button == MouseButtons.Left)
       {
-        Toggle();
+        //Toggle();
+        InvokeRightClick();
       }
       else if (e.Button == MouseButtons.Middle)
       {
         RunExe();
+      }
+    }
+
+    private void InvokeRightClick()
+    {
+      var mi = typeof(NotifyIcon).GetMethod("ShowContextMenu", BindingFlags.Instance | BindingFlags.NonPublic);
+      if (mi != null)
+      {
+        mi.Invoke(notifyIcon, null);
+      }
+      else
+      {
+        Console.WriteLine("Failed at InvokeRightClick()");
       }
     }
 
@@ -119,8 +135,8 @@ namespace DisplayModeToggler
 
     private void menuItem_Click(object sender, EventArgs e)
     {
-      var index = ((MenuItem)sender).Index;
-      PerformSwitch(Modes[index]);
+      _lastSelectedModeIndex = ((MenuItem)sender).Index;
+      PerformSwitch(Modes[_lastSelectedModeIndex]);
     }
 
     private void menuItemExit_Click(object sender, EventArgs e)
@@ -197,6 +213,17 @@ namespace DisplayModeToggler
       {
         SetDefaultNotifyIcon();
       }
+    }
+
+    private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+    {
+      ++_lastSelectedModeIndex;
+      if (_lastSelectedModeIndex >= Modes.Count)
+      {
+        _lastSelectedModeIndex = 0;
+      }
+
+      PerformSwitch(Modes[_lastSelectedModeIndex]);
     }
   }
 
