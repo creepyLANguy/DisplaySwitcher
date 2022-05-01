@@ -19,28 +19,21 @@ namespace DisplayModeToggler
 
     private const string ExeName = "DisplaySwitch.exe";
 
-    private static readonly Mode ModeClone = new Mode(0, "Clone", "/clone");
-    private static readonly Mode ModeExtend = new Mode(1, "Extend", "/extend");
-    private static readonly Mode ModePrimary = new Mode(2, "Primary", "/internal");
-    private static readonly Mode ModeCloneSecondary = new Mode(3, "Secondary", "/external");
-
     private static readonly List<Mode> Modes = new List<Mode>
     {
-      ModeClone,
-      ModeExtend,
-      ModePrimary,
-      ModeCloneSecondary
+      new Mode(0, "Clone", "/clone"),
+      new Mode(1, "Extend", "/extend"),
+      new Mode(2, "Primary", "/internal"),
+      new Mode(3, "Secondary", "/external")
     };
 
-    private readonly List<Mode> _singleClickModes = new List<Mode> {ModeClone, ModeExtend};
-    
-    private int _lastSelectedSingleClickIndex;
-    
-    private int _lastSelectedModeIndex;
-    
-    public Form1()
-    {
+    public Form1() => 
       InitializeComponent();
+
+    private void Form1_Load(object sender, EventArgs e)
+    {
+      SetupContextMenu();
+      Minimize();
     }
 
     private void Minimize()
@@ -77,22 +70,18 @@ namespace DisplayModeToggler
       notifyIcon.ContextMenu = _contextMenu;
     }
 
-    private void Form1_Load(object sender, EventArgs e)
+    private void Form1_LocationChanged(object sender, EventArgs e)
     {
-      SetupContextMenu();
-      Minimize();
-    }
-
-    private void SetDefaultNotifyIcon()
-    {
-      notifyIcon.Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+      if (WindowState == FormWindowState.Minimized)
+      {
+        Minimize();
+      }
     }
 
     private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
     {
       if (e.Button == MouseButtons.Left)
       {
-        //Toggle();
         InvokeRightClick();
       }
       else if (e.Button == MouseButtons.Middle)
@@ -110,7 +99,7 @@ namespace DisplayModeToggler
       }
       else
       {
-        Console.WriteLine("Failed at InvokeRightClick()");
+        Console.WriteLine(@"Failed at InvokeRightClick()");
       }
     }
 
@@ -133,16 +122,11 @@ namespace DisplayModeToggler
       process.WaitForExit();
     }
 
-    private void menuItem_Click(object sender, EventArgs e)
-    {
-      _lastSelectedModeIndex = ((MenuItem)sender).Index;
-      PerformSwitch(Modes[_lastSelectedModeIndex]);
-    }
+    private void menuItem_Click(object sender, EventArgs e) =>
+      PerformSwitch(Modes[((MenuItem)sender).Index]);
 
-    private void menuItemExit_Click(object sender, EventArgs e)
-    {
-      Close();
-    }
+      private void menuItemExit_Click(object sender, EventArgs e) => 
+        Close();
 
     private void PerformSwitch(Mode mode)
     {
@@ -150,25 +134,12 @@ namespace DisplayModeToggler
       {
         RunExe(mode);
 
-        SetIcon(mode.Name);
-
         notifyIcon.ShowBalloonTip(BalloonTime, "Switched Display Mode", mode.Name, ToolTipIcon.None);
         notifyIcon.Text = mode.Name;
 
-        foreach (MenuItem item in notifyIcon.ContextMenu.MenuItems)
-        {
-          var i = item.Text.IndexOf(ActiveMarker, StringComparison.Ordinal);
-          if (i >= 0)
-          {
-            item.Text = item.Text.Substring(0, i);
-          }
-        }
-        notifyIcon.ContextMenu.MenuItems[mode.Index].Text += ActiveMarker;
+        SetActiveMarker(mode);
 
-        if (_singleClickModes[_lastSelectedSingleClickIndex] != mode)
-        {
-          ++_lastSelectedSingleClickIndex;
-        }
+        SetIcon(mode.Name);
       }
       catch (Exception ex)
       {
@@ -180,27 +151,20 @@ namespace DisplayModeToggler
           ToolTipIcon.Error
           );
       }
-
     }
 
-    private void Form1_LocationChanged(object sender, EventArgs e)
+    private void SetActiveMarker(Mode mode)
     {
-      if (WindowState == FormWindowState.Minimized)
+      foreach (MenuItem item in notifyIcon.ContextMenu.MenuItems)
       {
-        Minimize();
+        var i = item.Text.IndexOf(ActiveMarker, StringComparison.Ordinal);
+        if (i >= 0)
+        {
+          item.Text = item.Text.Substring(0, i);
+        }
       }
+      notifyIcon.ContextMenu.MenuItems[mode.Index].Text += ActiveMarker;
     }
-
-    private void Toggle()
-    {
-      ++_lastSelectedSingleClickIndex;
-      if (_lastSelectedSingleClickIndex >= _singleClickModes.Count)
-      {
-        _lastSelectedSingleClickIndex = 0;
-      }
-
-      PerformSwitch(_singleClickModes[_lastSelectedSingleClickIndex]);
-    }    
 
     private void SetIcon(string iconName)
     {
@@ -211,19 +175,8 @@ namespace DisplayModeToggler
       }
       catch (Exception)
       {
-        SetDefaultNotifyIcon();
+        notifyIcon.Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
       }
-    }
-
-    private void notifyIcon_MouseDoubleClick(object sender, MouseEventArgs e)
-    {
-      ++_lastSelectedModeIndex;
-      if (_lastSelectedModeIndex >= Modes.Count)
-      {
-        _lastSelectedModeIndex = 0;
-      }
-
-      PerformSwitch(Modes[_lastSelectedModeIndex]);
     }
   }
 
@@ -236,8 +189,8 @@ namespace DisplayModeToggler
       Command = command;
     }
 
-    public int Index;
-    public string Name;
-    public string Command;
+    public readonly int Index;
+    public readonly string Name;
+    public readonly string Command;
   }
 }
