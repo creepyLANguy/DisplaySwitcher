@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using System.Drawing;
 using System.Reflection;
+using System.Threading;
 
 namespace DisplayModeToggler
 {
@@ -140,6 +141,9 @@ namespace DisplayModeToggler
         SetActiveMarker(mode);
 
         SetIcon(mode.Name);
+
+        //AL. This is experimental 
+        ResetSoundSwitcher();
       }
       catch (Exception ex)
       {
@@ -177,6 +181,26 @@ namespace DisplayModeToggler
       {
         notifyIcon.Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
       }
+    }
+
+    //AL. This is experimental 
+    //TODO - refactor, remove the hardcoded strings, get paths from config, etc. 
+    private void ResetSoundSwitcher()
+    {
+      var processes = Process.GetProcessesByName("ALsSoundSwitcher");
+      if (processes.Length > 0)
+      {
+        foreach (var process in processes)
+        {
+          process.Kill();
+        }
+      }
+
+      //var files = Directory.GetFiles(Directory.GetCurrentDirectory());
+
+      Thread.Sleep(3000);
+
+      Process.Start("ResetSoundSwitcher.lnk");
     }
   }
 
