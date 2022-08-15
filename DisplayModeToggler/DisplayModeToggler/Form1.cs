@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -187,6 +189,12 @@ namespace DisplayModeToggler
     //TODO - refactor, remove the hardcoded strings, get paths from config, etc. 
     private void ResetSoundSwitcher()
     {
+      var files = Directory.GetFiles(Directory.GetCurrentDirectory()).Select(file => Path.GetFileName(file)).ToArray();
+      if (files.Contains("ResetSoundSwitcher.lnk") == false)
+      {
+        return;
+      }
+      
       var processes = Process.GetProcessesByName("ALsSoundSwitcher");
       if (processes.Length > 0)
       {
