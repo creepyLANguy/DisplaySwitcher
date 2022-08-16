@@ -209,6 +209,13 @@ namespace DisplayModeToggler
       Thread.Sleep(3000);
 
       Process.Start("ResetSoundSwitcher.lnk");
+
+      Thread.Sleep(100);
+
+      if (files.Contains("RefreshNotificationArea.exe") == true)
+      {
+        Process.Start("RefreshNotificationArea.exe");
+      }
     }
   }
 
