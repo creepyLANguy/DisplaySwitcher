@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Threading;
 
 namespace DisplayModeToggler
 {
@@ -128,7 +125,7 @@ namespace DisplayModeToggler
     private void menuItem_Click(object sender, EventArgs e) =>
       PerformSwitch(Modes[((MenuItem)sender).Index]);
 
-      private void menuItemExit_Click(object sender, EventArgs e) => 
+    private void menuItemExit_Click(object sender, EventArgs e) => 
         Close();
 
     private void PerformSwitch(Mode mode)
@@ -143,9 +140,6 @@ namespace DisplayModeToggler
         SetActiveMarker(mode);
 
         SetIcon(mode.Name);
-
-        //AL. This is experimental 
-        ResetSoundSwitcher();
       }
       catch (Exception ex)
       {
@@ -182,39 +176,6 @@ namespace DisplayModeToggler
       catch (Exception)
       {
         notifyIcon.Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
-      }
-    }
-
-    //AL. This is experimental 
-    //TODO - refactor, remove the hardcoded strings, get paths from config, etc. 
-    private void ResetSoundSwitcher()
-    {
-      var files = Directory.GetFiles(Directory.GetCurrentDirectory()).Select(file => Path.GetFileName(file)).ToArray();
-      if (files.Contains("ResetSoundSwitcher.lnk") == false)
-      {
-        return;
-      }
-      
-      var processes = Process.GetProcessesByName("ALsSoundSwitcher");
-      if (processes.Length > 0)
-      {
-        foreach (var process in processes)
-        {
-          process.Kill();
-        }
-      }
-
-      //var files = Directory.GetFiles(Directory.GetCurrentDirectory());
-
-      Thread.Sleep(3000);
-
-      Process.Start("ResetSoundSwitcher.lnk");
-
-      Thread.Sleep(100);
-
-      if (files.Contains("RefreshNotificationArea.exe") == true)
-      {
-        Process.Start("RefreshNotificationArea.exe");
       }
     }
   }
