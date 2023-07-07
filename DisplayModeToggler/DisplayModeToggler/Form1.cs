@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Reflection;
+using Microsoft.Win32;
 
 namespace DisplayModeToggler
 {
   public partial class Form1 : Form
   {
+    private static Form1 _instance;
+
     private const int BalloonTime = 1500;
 
     private ContextMenu _contextMenu;
@@ -19,21 +23,38 @@ namespace DisplayModeToggler
 
     private const string ExeName = "DisplaySwitch.exe";
 
+    private static readonly Mode UnknownMode = new Mode(-1, "Unknown", "");
+
+    private static readonly string ModeNames_Clone = "Clone";
+    private static readonly string ModeNames_Extend = "Extend";
+    private static readonly string ModeNames_Primary = "Primary";
+    private static readonly string ModeNames_Secondary = "Secondary";
+
     private static readonly List<Mode> Modes = new List<Mode>
     {
-      new Mode(0, "Clone", "/clone"),
-      new Mode(1, "Extend", "/extend"),
-      new Mode(2, "Primary", "/internal"),
-      new Mode(3, "Secondary", "/external")
+      new Mode(0, ModeNames_Clone, "/clone"),
+      new Mode(1, ModeNames_Extend, "/extend"),
+      new Mode(2, ModeNames_Primary, "/internal"),
+      new Mode(3, ModeNames_Secondary, "/external")
     };
 
-    public Form1() => 
+    private static bool _amSwitching;
+
+    public Form1()
+    {
       InitializeComponent();
+      _instance = this;
+    }
+
 
     private void Form1_Load(object sender, EventArgs e)
     {
       SetupContextMenu();
       Minimize();
+
+      UpdateUI(TryInferDisplayMode());
+
+      SystemEvents.DisplaySettingsChanged += DisplaySettingsChangedEventHandler;
     }
 
     private void Minimize()
@@ -132,17 +153,19 @@ namespace DisplayModeToggler
     {
       try
       {
+        _amSwitching = true;
+
         RunExe(mode);
 
         notifyIcon.ShowBalloonTip(BalloonTime, "Switched Display Mode", mode.Name, ToolTipIcon.None);
         notifyIcon.Text = mode.Name;
 
-        SetActiveMarker(mode);
-
-        SetIcon(mode.Name);
+        UpdateUI(mode);
       }
       catch (Exception ex)
       {
+        _amSwitching = false;
+
         Console.WriteLine(ex.ToString());
         notifyIcon.ShowBalloonTip(
           BalloonTime, 
@@ -153,31 +176,54 @@ namespace DisplayModeToggler
       }
     }
 
-    private void SetActiveMarker(Mode mode)
+    private static void SetActiveMarker(Mode currentMode)
     {
-      foreach (MenuItem item in notifyIcon.ContextMenu.MenuItems)
+      var menuItems = _instance.notifyIcon.ContextMenu.MenuItems;
+
+      foreach (var mode in Modes)
       {
-        var i = item.Text.IndexOf(ActiveMarker, StringComparison.Ordinal);
-        if (i >= 0)
-        {
-          item.Text = item.Text.Substring(0, i);
-        }
+        menuItems[mode.Index].Text = mode.Name;
       }
-      notifyIcon.ContextMenu.MenuItems[mode.Index].Text += ActiveMarker;
+
+      if (currentMode != UnknownMode)
+      {
+        menuItems[currentMode.Index].Text += ActiveMarker;
+      }
     }
 
-    private void SetIcon(string iconName)
+    private static void SetIcon(Mode currentMode)
     {
       try
       {
-        var icon = new Icon(iconName + ".ico");
-        notifyIcon.Icon = icon;
+        var icon = new Icon(currentMode.Name + ".ico");
+        _instance.notifyIcon.Icon = icon;
       }
       catch (Exception)
       {
-        notifyIcon.Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
+        _instance.notifyIcon.Icon = Icon.ExtractAssociatedIcon(Assembly.GetExecutingAssembly().Location);
       }
     }
+
+    private static void UpdateUI(Mode mode)
+    {
+      SetActiveMarker(mode);
+      SetIcon(mode);
+    }
+
+    public static Mode TryInferDisplayMode() => 
+      Screen.AllScreens.Length > 1 ? Modes.First(m => m.Name == ModeNames_Extend) : UnknownMode;
+
+    private static void DisplaySettingsChangedEventHandler(object sender, EventArgs e)
+    {
+      if (_amSwitching)
+      {
+        _amSwitching = false;
+        return;
+      }
+
+      UpdateUI(TryInferDisplayMode());
+    } 
+      
   }
 
   public class Mode
@@ -194,3 +240,5 @@ namespace DisplayModeToggler
     public readonly string Command;
   }
 }
+
+
